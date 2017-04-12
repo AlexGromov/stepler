@@ -153,7 +153,8 @@ def network_setup(credentials,
                   user_project_resources,
                   get_network_steps,
                   get_router_steps,
-                  get_subnet_steps):
+                  get_subnet_steps,
+                  uncleanable):
     """Session fixture to setup network.
 
     For generated user and admin projects it creates internal network, subnet
@@ -180,6 +181,7 @@ def network_setup(credentials,
         for project in projects:
             internal_network = network_steps.create(
                 config.INTERNAL_NETWORK_NAME, project_id=project.id)
+            uncleanable.network_ids.add(internal_network['id'])
 
             subnet = subnet_steps.create(config.INTERNAL_SUBNET_NAME,
                                          network=internal_network,
@@ -190,6 +192,7 @@ def network_setup(credentials,
                                          project_id=project.id)
             router_steps.set_gateway(router, external_network)
             router_steps.add_subnet_interface(router, subnet)
+            uncleanable.router_ids.add(router['id'])
 
     yield
 
@@ -201,7 +204,9 @@ def network_setup(credentials,
             router = router_steps.get_router(name=config.ROUTER_NAME,
                                              tenant_id=project.id)
             router_steps.delete(router)
+            uncleanable.router_ids.remove(router['id'])
 
             network = network_steps.get_network_by_name(
                 config.INTERNAL_NETWORK_NAME, tenant_id=project.id)
             network_steps.delete(network)
+            uncleanable.network_ids.remove(network['id'])

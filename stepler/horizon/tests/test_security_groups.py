@@ -28,5 +28,13 @@ class TestAnyOne(object):
                                any_one='admin')
     @pytest.mark.idempotent_id('e41796c3-0f14-467c-80b0-98012d13bc1c',
                                any_one='user')
-    def test_create_security_group(self, security_group):
-        """Verify that user can create security group."""
+    def test_create_security_group(self, access_steps_ui):
+        """Verify that user can create security group.
+
+        **Steps:**
+
+        #. Create security group using UI
+        #. Delete router using UI
+        """
+        group_name = access_steps_ui.create_security_group()
+        access_steps_ui.delete_security_group(group_name)
